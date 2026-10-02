@@ -26,7 +26,6 @@ jobs:
         run: mvn clean verify --file simple-api/pom.xml
 
       - name: sonarcloud code quality
-        working-directory: simple-api
         run: mvn -B verify sonar:sonar -Dsonar.projectKey=lykomonix -Dsonar.organization="Henri Hartz" -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./simple-api/pom.xml
 
 
