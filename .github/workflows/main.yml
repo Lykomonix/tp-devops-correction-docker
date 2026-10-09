@@ -76,7 +76,7 @@ jobs:
           # front code copied into the front/ folder, with its Dockerfile
           context: front
           # Note: tags has to be all lower-case
-          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-front:latest
+          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-httpd:latest
           # the API is reached through the httpd proxy under /api
           build-args: |
             VUE_APP_API_URL=/api
