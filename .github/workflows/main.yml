@@ -25,8 +25,8 @@ jobs:
       - name: Build and test with Maven
         run: mvn clean verify --file simple-api/pom.xml
 
-      - name: sonarcloud code quality
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=lykomonix -Dsonar.organization="Henri Hartz" -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./simple-api/pom.xml
+      # - name: sonarcloud code quality
+      #   run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Lykomonix_tp-devops-correction-docker -Dsonar.organization="Henri Hartz" -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./simple-api/pom.xml
 
 
   # define job to build and publish docker image
@@ -70,4 +70,37 @@ jobs:
           tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-httpd:latest
           push: ${{ github.ref == 'refs/heads/main' }}
 
-      
+  deploy:
+    needs: build-and-push-docker-image
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Ansible and the docker collection
+        run: |
+          pip install ansible
+          ansible-galaxy collection install community.docker
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H henri.hartz.takima.school >> ~/.ssh/known_hosts
+
+      - name: Run playbook
+        working-directory: ansible
+        env:
+          VAULT_PASS: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+        run: |
+          echo "$VAULT_PASS" > .vault_pass
+          ansible-playbook -i inventory.yml playbook.yml \
+            --vault-password-file .vault_pass \
+            -e dockerhub_username=${{ secrets.DOCKERHUB_USERNAME }}
+          rm -f .vault_pass

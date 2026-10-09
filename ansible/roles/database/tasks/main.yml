@@ -1,0 +1,28 @@
+---
+- name: Create database config directory
+  file:
+    path: /opt/database
+    state: directory
+
+- name: Generate database .env
+  template:
+    src: db.env.j2
+    dest: /opt/database/.env
+    mode: "0600"
+  register: db_env
+
+- name: Launch database
+  docker_container:
+    name: "{{ db_container }}"
+    image: "{{ db_image }}"
+    state: started
+    pull: true
+    restart: "{{ db_env.changed }}"
+    restart_policy: always
+    env_file: /opt/database/.env
+    networks:
+      - name: "{{ app_network }}"
+    volumes:
+      - "{{ db_volume }}:/var/lib/postgresql/data"
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python
