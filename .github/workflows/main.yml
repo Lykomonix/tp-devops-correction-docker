@@ -70,6 +70,18 @@ jobs:
           tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-httpd:latest
           push: ${{ github.ref == 'refs/heads/main' }}
 
+      - name: Build image and push front
+        uses: docker/build-push-action@v6
+        with:
+          # front code copied into the front/ folder, with its Dockerfile
+          context: front
+          # Note: tags has to be all lower-case
+          tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-front:latest
+          # the API is reached through the httpd proxy under /api
+          build-args: |
+            VUE_APP_API_URL=/api
+          push: ${{ github.ref == 'refs/heads/main' }}
+
   deploy:
     needs: build-and-push-docker-image
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
