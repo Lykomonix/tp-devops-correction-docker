@@ -1,14 +1,29 @@
----
+- name: Create httpd config directory
+  file:
+    path: /opt/httpd
+    state: directory
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python
+
+- name: Deploy httpd config
+  template:
+    src: httpd.conf.j2
+    dest: /opt/httpd/httpd.conf
+  register: httpd_conf
+
 - name: Launch proxy
   docker_container:
     name: "{{ proxy_container }}"
     image: "{{ proxy_image }}"
     state: started
     pull: true
+    restart: "{{ httpd_conf.changed }}"
     restart_policy: always
     networks:
       - name: "{{ app_network }}"
-    ports:
+    published_ports:
       - "80:80"
+    volumes:
+      - /opt/httpd/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
   vars:
     ansible_python_interpreter: /opt/docker_venv/bin/python
