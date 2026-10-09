@@ -1,0 +1,13 @@
+---
+app_network: my-network
+
+db_container: database
+db_image: henrihartz/tp-devops-database:latest
+db_password: pwd          # move to ansible-vault later
+db_volume: db-volume
+
+app_container: simple-api
+app_image: henrihartz/tp-devops-simple-api:latest
+
+proxy_container: httpd
+proxy_image: henrihartz/tp-devops-httpd:latest
