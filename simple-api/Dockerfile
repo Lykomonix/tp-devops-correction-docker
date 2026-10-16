@@ -4,11 +4,13 @@ ENV SIMPLE_API_HOME=/opt/simple-api
 WORKDIR $SIMPLE_API_HOME
 COPY pom.xml .
 COPY src ./src
-RUN mvn package -DskipTests
+RUN mvn package -DskipTests \
+    -Dmaven.wagon.http.retryHandler.count=5 \
+    -Dmaven.wagon.http.retryHandler.requestSentEnabled=true
 
 # Run
 FROM amazoncorretto:21
-ENV SIMPLE_API_HOME=/opt/simple-api
+ENV SIMPLE_API_HOME=/opt/simple-api 
 WORKDIR $SIMPLE_API_HOME
 COPY --from=simple-api-build $SIMPLE_API_HOME/target/*.jar $SIMPLE_API_HOME/simpleapi.jar
 
