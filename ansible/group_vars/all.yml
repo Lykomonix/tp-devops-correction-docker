@@ -11,3 +11,5 @@ app_image: henrihartz/tp-devops-simple-api:latest
 
 proxy_container: httpd
 proxy_image: henrihartz/tp-devops-httpd:latest
+
+front_image: henrihartz/tp-devops-httpd
