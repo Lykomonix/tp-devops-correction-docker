@@ -80,7 +80,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           # front code copied into the front/ folder, with its Dockerfile
-          context: front
+          context: http-server
           # Note: tags has to be all lower-case
           tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-httpd:latest
           # the API is reached through the httpd proxy under /api
